@@ -1,0 +1,584 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ValgusWatch Live</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Public+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+  :root{
+    --navy:#101A2E; --navy-2:#16233E; --navy-3:#1C2C4A;
+    --paper:#FAFAF8; --panel:#F0F3F1; --line:#E3E6E4;
+    --ink:#101A2E; --muted:#4A5568; --muted-2:#8FA0B3; --muted-3:#8A94A3; --faint:#5B6B84;
+    --teal:#21D4A6; --teal-dark:#0F9E7C;
+    --amber:#E0A544; --amber-bg:#FBEBD3; --amber-ink:#9A6414;
+    --red:#C24E3A; --red-bg:#FBDFD8; --red-ink:#9A3A2A;
+    --green-bg:#DDF3EC; --green-ink:#0B7A61;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:'Public Sans',Arial,sans-serif;}
+  h1,h2,h3,.disp{font-family:'Oswald',Arial,sans-serif;}
+  .mono{font-family:'JetBrains Mono',monospace;}
+  a{color:var(--teal-dark);text-decoration:none;}
+  button{font-family:'Public Sans',Arial,sans-serif;cursor:pointer;}
+  ::selection{background:var(--teal);color:var(--navy);}
+
+  .shell{max-width:1100px;margin:0 auto;padding:0 20px 64px;}
+  .topbar{background:var(--navy);padding:20px 24px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;border-radius:0 0 16px 16px;margin-bottom:22px;}
+  .brand{display:flex;align-items:baseline;gap:12px;}
+  .brand .name{font-family:'Oswald',Arial,sans-serif;font-size:21px;font-weight:700;color:var(--paper);letter-spacing:.5px;}
+  .brand .tag{font-family:'Oswald',Arial,sans-serif;font-size:11px;font-weight:600;color:var(--teal);letter-spacing:2px;text-transform:uppercase;}
+  .roletoggle{display:flex;background:var(--navy-2);border-radius:10px;padding:4px;gap:4px;}
+  .roletoggle button{border:none;background:transparent;color:var(--muted-2);font-size:13px;font-weight:600;padding:9px 16px;border-radius:7px;transition:background .15s,color .15s;}
+  .roletoggle button.active{background:var(--teal);color:var(--navy);}
+  .sync{font-size:12px;color:var(--muted-2);display:flex;align-items:center;gap:6px;}
+  .dot{width:7px;height:7px;border-radius:50%;background:var(--teal);flex-shrink:0;}
+  .dot.off{background:#C24E3A;}
+
+  .banner{background:var(--amber-bg);color:var(--amber-ink);border:1px solid #F0D9AE;border-radius:12px;padding:14px 18px;font-size:13.5px;margin-bottom:20px;line-height:1.5;}
+  .banner code{background:#F3E2BC;padding:1px 6px;border-radius:5px;font-family:'JetBrains Mono',monospace;font-size:12.5px;}
+
+  .phone{max-width:390px;margin:0 auto;}
+  .card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:26px 22px;box-shadow:0 1px 2px rgba(16,26,46,.04);}
+  .eyebrow{font-family:'Oswald',Arial,sans-serif;font-size:12px;font-weight:600;color:var(--teal-dark);letter-spacing:2px;text-transform:uppercase;}
+  .h-title{font-size:24px;font-weight:600;margin:6px 0 6px;}
+  .sub{font-size:13.5px;color:var(--muted);line-height:1.5;}
+  .field{display:flex;flex-direction:column;gap:6px;margin-top:18px;}
+  .field label{font-size:13px;font-weight:600;color:var(--ink);}
+  .field input,.field select{font-size:15px;padding:12px 13px;border-radius:10px;border:1px solid var(--line);background:var(--paper);font-family:'Public Sans',Arial,sans-serif;color:var(--ink);}
+  .field input:focus,.field select:focus{outline:2px solid var(--teal);outline-offset:1px;}
+  .primary-btn{width:100%;padding:15px;border-radius:12px;border:none;background:var(--teal);color:var(--navy);font-size:15.5px;font-weight:700;margin-top:22px;}
+  .primary-btn:disabled{background:#C7D2D9;color:#6B7684;}
+  .ghost-btn{width:100%;padding:12px;border-radius:12px;border:1px solid var(--line);background:transparent;color:var(--muted);font-size:13.5px;font-weight:600;margin-top:10px;}
+  .profile-chip{background:var(--navy-2);color:#fff;border-radius:14px;padding:15px 18px;display:flex;flex-direction:column;gap:3px;margin-top:18px;}
+  .profile-chip .pname{font-family:'Oswald',Arial,sans-serif;font-size:17px;font-weight:600;}
+  .profile-chip .pmeta{font-size:12.5px;color:var(--muted-2);}
+  input[type="range"]{-webkit-appearance:none;width:100%;height:6px;border-radius:3px;background:var(--line);margin:6px 0;}
+  input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border-radius:50%;background:var(--teal);cursor:pointer;border:none;}
+  input[type="range"]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;background:var(--teal);cursor:pointer;border:none;}
+  .slider-row{margin-top:20px;}
+  .slider-row .lbl{display:flex;justify-content:space-between;font-size:14px;font-weight:600;}
+  .slider-row .lbl span.val{color:var(--teal-dark);font-family:'JetBrains Mono',monospace;font-weight:500;}
+  .slider-endcaps{display:flex;justify-content:space-between;font-size:11.5px;color:var(--muted-2);}
+  .footnote{font-size:11.5px;color:var(--faint);text-align:center;margin-top:16px;line-height:1.5;}
+  .confirm{text-align:center;padding:10px 4px 4px;}
+  .confirm .tick{width:52px;height:52px;border-radius:50%;background:var(--green-bg);color:var(--green-ink);display:flex;align-items:center;justify-content:center;font-size:26px;margin:0 auto 16px;}
+
+  .stats{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:26px;}
+  .stat{flex:1;min-width:150px;background:var(--navy);border-radius:14px;padding:18px 22px;}
+  .stat .k{font-size:12.5px;color:var(--muted-2);}
+  .stat .v{font-family:'Oswald',Arial,sans-serif;font-size:30px;font-weight:700;color:#fff;margin-top:4px;}
+  .stat .v.warn{color:var(--amber);}
+  .sectiontitle{font-family:'Oswald',Arial,sans-serif;font-size:14px;font-weight:600;letter-spacing:1px;text-transform:uppercase;margin:0 0 14px;color:var(--ink);}
+  .roster{display:flex;flex-direction:column;gap:10px;}
+  .empty{background:var(--panel);border:1px dashed var(--line);border-radius:14px;padding:34px 20px;text-align:center;color:var(--muted);font-size:14px;line-height:1.6;}
+  .row{display:flex;align-items:center;gap:16px;padding:14px 16px;border:1px solid var(--line);border-radius:12px;background:#fff;text-align:left;width:100%;transition:border-color .15s,background .15s;}
+  .row:hover{border-color:var(--teal-dark);background:#F7FBFA;}
+  .row .name{font-size:15.5px;font-weight:600;flex:1 1 150px;min-width:0;}
+  .row .name .sm{display:block;font-size:12px;font-weight:400;color:var(--muted-3);margin-top:2px;}
+  .row .when{font-size:13px;color:var(--muted);width:100px;flex-shrink:0;}
+  .badge{font-size:12.5px;font-weight:600;padding:5px 12px;border-radius:20px;white-space:nowrap;}
+  .badge.Normal{color:var(--green-ink);background:var(--green-bg);}
+  .badge.Elevated{color:var(--amber-ink);background:var(--amber-bg);}
+  .badge.High{color:var(--red-ink);background:var(--red-bg);}
+  .badge.New{color:var(--muted);background:var(--panel);}
+  .chevron{color:var(--teal-dark);font-size:14px;font-weight:600;flex-shrink:0;}
+
+  @media (max-width:640px){
+    .row{flex-wrap:wrap;}
+    .row .when{order:3;width:auto;}
+    .row .name{flex-basis:100%;}
+  }
+
+  .backlink{display:inline-flex;align-items:center;gap:6px;font-size:13.5px;font-weight:600;color:var(--muted);border:1px solid var(--line);padding:8px 14px;border-radius:8px;margin-bottom:20px;background:#fff;}
+  .detail-head{display:flex;align-items:center;gap:18px;flex-wrap:wrap;margin-bottom:16px;}
+  .avatar{width:54px;height:54px;border-radius:50%;background:var(--teal);display:flex;align-items:center;justify-content:center;font-family:'Oswald',Arial,sans-serif;font-size:20px;font-weight:700;color:var(--navy);flex-shrink:0;}
+  .detail-head h2{font-size:24px;font-weight:600;margin:0;}
+  .detail-head .since{font-size:13px;color:var(--muted);margin-top:2px;}
+  .chips{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px;}
+  .chip{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:8px 14px;font-size:13px;}
+  .chip.warn{background:var(--red-bg);border-color:#F3C6BC;color:var(--red-ink);}
+  .chip b{font-weight:600;color:var(--ink);}
+  .chip.warn b{color:var(--red-ink);}
+  .detail-grid{display:grid;grid-template-columns:1.3fr 1fr;gap:18px;}
+  @media (max-width:760px){.detail-grid{grid-template-columns:1fr;}}
+  .trendcard{background:var(--navy);border-radius:16px;padding:24px;color:#fff;}
+  .trendcard .lbl{font-size:13px;font-weight:600;color:var(--muted-2);text-transform:uppercase;letter-spacing:1px;}
+  .bars{display:flex;align-items:end;gap:14px;height:130px;padding-top:18px;}
+  .bars .b{flex:1;display:flex;flex-direction:column;align-items:center;gap:8px;height:100%;justify-content:flex-end;}
+  .bars .b .stem{width:100%;border-radius:6px 6px 0 0;min-height:4px;}
+  .bars .b .lb{font-size:11px;color:var(--muted-2);}
+  .trendnote{font-size:12.5px;color:var(--muted-2);margin-top:12px;}
+  .metric{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:14px;}
+  .metric.warn{background:var(--red-bg);border-color:#F3C6BC;}
+  .metric .k{font-size:13px;color:var(--muted);}
+  .metric.warn .k{color:var(--red-ink);}
+  .metric .v{font-family:'Oswald',Arial,sans-serif;font-size:26px;font-weight:700;margin-top:3px;}
+  .metric .d{font-size:12px;color:var(--muted);margin-top:2px;}
+  .loglist{display:flex;flex-direction:column;gap:9px;padding-top:10px;}
+  .logrow{display:flex;justify-content:space-between;font-size:13.5px;}
+  .logrow .d1{color:var(--ink);}
+  .logrow .d2{color:var(--muted);}
+
+  .loading{padding:60px 0;text-align:center;color:var(--muted-2);font-size:14px;}
+</style>
+</head>
+<body>
+
+<div id="app" class="shell">
+  <div class="loading">Loading ValgusWatch…</div>
+</div>
+
+<!-- Firebase (free tier) — powers the shared live database for this public deployment -->
+<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore-compat.js"></script>
+
+<script>
+(function(){
+  "use strict";
+
+  // =====================================================================
+  // FIREBASE CONFIG — replace the placeholders with YOUR project's values
+  // (Firebase console → Project settings → General → Your apps → Web app)
+  // =====================================================================
+  var firebaseConfig = {
+    apiKey: "AIzaSyC2F5uYa7q5eABgVQfhMdEYVWSaPiP7U5s",
+    authDomain: "valgus-watch.firebaseapp.com",
+    projectId: "valgus-watch",
+    storageBucket: "valgus-watch.firebasestorage.app",
+    messagingSenderId: "530277099137",
+    appId: "1:530277099137:web:27f5bf8241180082c64f80"
+  };
+  // =====================================================================
+
+  var db = null;
+  var app = document.getElementById('app');
+  var detailUnsub = null;
+  var dashUnsub = null;
+  var configIsPlaceholder = firebaseConfig.apiKey.indexOf('PASTE_') === 0;
+
+  function safeGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
+  function safeSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
+  function safeDel(k){ try{ localStorage.removeItem(k); }catch(e){} }
+
+  var state = {
+    role: safeGet('vw_role') || 'athlete',
+    athleteId: safeGet('vw_athlete_id') || null
+  };
+
+  function esc(s){
+    var d = document.createElement('div');
+    d.textContent = (s === null || s === undefined) ? '' : String(s);
+    return d.innerHTML;
+  }
+
+  function timeAgo(ts){
+    if(!ts) return 'No check-in yet';
+    var d = new Date(ts), days = Math.floor((Date.now()-d.getTime())/86400000);
+    if(days<=0) return 'Today';
+    if(days===1) return 'Yesterday';
+    if(days<7) return days+' days ago';
+    return d.toLocaleDateString(undefined,{month:'short',day:'numeric'});
+  }
+
+  function initials(name){
+    if(!name) return '?';
+    var parts = name.trim().split(/\s+/);
+    return ((parts[0]||'')[0]||'').toUpperCase() + ((parts[1]||'')[0]||'').toUpperCase();
+  }
+
+  function riskLevel(discomfort, history){
+    if(discomfort===null||discomfort===undefined) return 'New';
+    if(discomfort>=4) return 'High';
+    var all = history.concat([discomfort]);
+    if(all.length>=3){
+      var recent = all.slice(-3);
+      var rise = recent[2]-recent[0];
+      if(rise>=2) return 'High';
+      if(rise>=1 || discomfort===3) return 'Elevated';
+    } else if(discomfort===3){
+      return 'Elevated';
+    }
+    return 'Normal';
+  }
+
+  // ---------------- topbar / shell ----------------
+
+  function renderShell(bodyHtml){
+    app.innerHTML =
+      '<div class="topbar">' +
+        '<div class="brand"><span class="name">ValgusWatch</span><span class="tag">Live</span></div>' +
+        '<div class="roletoggle">' +
+          '<button data-role="athlete" class="'+(state.role==='athlete'?'active':'')+'">Athlete</button>' +
+          '<button data-role="coach" class="'+(state.role==='coach'?'active':'')+'">Coach &amp; Medical</button>' +
+        '</div>' +
+        '<div class="sync"><span class="dot '+(db?'':'off')+'"></span>'+(db?'Synced live':'Not connected')+'</div>' +
+      '</div>' +
+      bodyHtml;
+
+    var btns = app.querySelectorAll('.roletoggle button');
+    for(var i=0;i<btns.length;i++){
+      btns[i].addEventListener('click', function(e){
+        state.role = e.currentTarget.getAttribute('data-role');
+        safeSet('vw_role', state.role);
+        cleanupListeners();
+        route();
+      });
+    }
+  }
+
+  function cleanupListeners(){
+    if(dashUnsub){ dashUnsub(); dashUnsub=null; }
+    if(detailUnsub){ detailUnsub(); detailUnsub=null; }
+  }
+
+  function noDbBanner(){
+    if(configIsPlaceholder){
+      return '<div class="banner">Setup needed: this copy still has placeholder Firebase config. Open <code>index.html</code>, find the <code>firebaseConfig</code> block near the top of the script, and paste in your own project\'s values from the Firebase console. Nothing will save until that\'s done.</div>';
+    }
+    return '<div class="banner">Could not connect to the database right now. Double-check your Firebase config values and that Firestore rules allow read/write on the <code>athletes</code> collection.</div>';
+  }
+
+  // ---------------- ATHLETE: join form ----------------
+
+  function renderJoin(){
+    var html = (db?'':noDbBanner());
+    html += '<div class="phone"><div class="card">' +
+      '<div class="eyebrow">Welcome</div>' +
+      '<div class="h-title">Join the squad</div>' +
+      '<div class="sub">Enter your details once — your coach and medical staff will see your check-ins from here on.</div>' +
+      '<div class="field"><label for="jn-name">Full name</label><input id="jn-name" type="text" placeholder="e.g. Aditi Sharma" autocomplete="name"></div>' +
+      '<div class="field"><label for="jn-age">Age</label><input id="jn-age" type="number" min="10" max="60" placeholder="19"></div>' +
+      '<div class="field"><label for="jn-pos">Position</label><select id="jn-pos">' +
+        '<option value="">Select…</option>' +
+        '<option>Batter</option><option>Fielder</option><option>Wicketkeeper</option>' +
+        '<option>Fast bowler</option><option>Spin bowler</option><option>All-rounder</option>' +
+      '</select></div>' +
+      '<div class="field"><label for="jn-leg">Dominant leg</label><select id="jn-leg">' +
+        '<option value="">Select…</option><option>Right</option><option>Left</option>' +
+      '</select></div>' +
+      '<button class="primary-btn" id="jn-submit" '+(db?'':'disabled')+'>Join &amp; continue</button>' +
+      '<div class="footnote">Your name and check-ins are visible to your coach and team medical staff, never shared outside the team.</div>' +
+    '</div></div>';
+    renderShell(html);
+
+    document.getElementById('jn-submit').addEventListener('click', function(){
+      if(!db) return;
+      var name = document.getElementById('jn-name').value.trim();
+      var age = document.getElementById('jn-age').value;
+      var pos = document.getElementById('jn-pos').value;
+      var leg = document.getElementById('jn-leg').value;
+      if(!name){ alert('Please enter your name.'); return; }
+      var btn = document.getElementById('jn-submit');
+      btn.disabled = true; btn.textContent = 'Joining…';
+      db.collection('athletes').add({
+        name: name,
+        age: age ? Number(age) : null,
+        position: pos || null,
+        dominantLeg: leg || null,
+        team: 'U19 Squad',
+        createdAt: new Date().toISOString(),
+        lastEnergy: null, lastDiscomfort: null, lastSleep: null, lastCheckinAt: null,
+        riskLevel: 'New', sessionsLogged: 0
+      }).then(function(ref){
+        state.athleteId = ref.id;
+        safeSet('vw_athlete_id', ref.id);
+        safeSet('vw_athlete_name', name);
+        renderAthleteRoute();
+      }).catch(function(e){
+        btn.disabled = false; btn.textContent = 'Join & continue';
+        alert('Could not save right now (' + (e && e.code ? e.code : 'error') + '). Please try again.');
+      });
+    });
+  }
+
+  // ---------------- ATHLETE: check-in ----------------
+
+  function renderCheckin(athleteDoc){
+    var d = athleteDoc.data();
+    var html = '<div class="phone"><div class="card">' +
+      '<div class="eyebrow">Before you train</div>' +
+      '<div class="h-title">Daily check-in</div>' +
+      '<div class="sub">Takes about 30 seconds — helps your coach and medical team spot patterns early.</div>' +
+      '<div class="profile-chip"><span class="pname">'+esc(d.name)+'</span>' +
+        '<span class="pmeta">'+[d.age?('Age '+esc(d.age)):null, d.position?esc(d.position):null].filter(Boolean).join(' · ')+'</span></div>' +
+
+      '<div class="slider-row"><div class="lbl">Energy today <span class="val" id="v-energy">4</span></div>' +
+        '<input type="range" min="1" max="5" value="4" id="s-energy">' +
+        '<div class="slider-endcaps"><span>Low</span><span>High</span></div></div>' +
+
+      '<div class="slider-row"><div class="lbl">Discomfort / soreness <span class="val" id="v-discomfort">2</span></div>' +
+        '<input type="range" min="1" max="5" value="2" id="s-discomfort">' +
+        '<div class="slider-endcaps"><span>None</span><span>A lot</span></div></div>' +
+
+      '<div class="slider-row"><div class="lbl">Sleep last night <span class="val" id="v-sleep">3</span></div>' +
+        '<input type="range" min="1" max="5" value="3" id="s-sleep">' +
+        '<div class="slider-endcaps"><span>Poor</span><span>Great</span></div></div>' +
+
+      '<button class="primary-btn" id="ci-submit" '+(db?'':'disabled')+'>Start session</button>' +
+      '<button class="ghost-btn" id="ci-switch">Not you? Switch profile</button>' +
+      '<div class="footnote">Seen by your coach and team medical staff. Not shared outside the team.</div>' +
+    '</div></div>';
+    renderShell((db?'':noDbBanner()) + html);
+
+    ['energy','discomfort','sleep'].forEach(function(k){
+      var s = document.getElementById('s-'+k), v = document.getElementById('v-'+k);
+      s.addEventListener('input', function(){ v.textContent = s.value; });
+    });
+
+    document.getElementById('ci-switch').addEventListener('click', function(){
+      safeDel('vw_athlete_id'); safeDel('vw_athlete_name');
+      state.athleteId = null;
+      renderAthleteRoute();
+    });
+
+    document.getElementById('ci-submit').addEventListener('click', function(){
+      if(!db) return;
+      var btn = document.getElementById('ci-submit');
+      btn.disabled = true; btn.textContent = 'Saving…';
+      var energy = Number(document.getElementById('s-energy').value);
+      var discomfort = Number(document.getElementById('s-discomfort').value);
+      var sleep = Number(document.getElementById('s-sleep').value);
+      var checkinsRef = db.collection('athletes/'+state.athleteId+'/checkins');
+      checkinsRef.orderBy('ts','desc').limit(3).get().then(function(snap){
+        var priorAsc = snap.docs.map(function(doc){ return doc.data().discomfort; }).reverse();
+        var risk = riskLevel(discomfort, priorAsc);
+        var ts = new Date().toISOString();
+        return checkinsRef.add({energy:energy, discomfort:discomfort, sleep:sleep, ts:ts, riskLevel:risk})
+          .then(function(){
+            return db.doc('athletes/'+state.athleteId).update({
+              lastEnergy: energy, lastDiscomfort: discomfort, lastSleep: sleep,
+              lastCheckinAt: ts, riskLevel: risk,
+              sessionsLogged: (d.sessionsLogged||0) + 1
+            });
+          });
+      }).then(function(){
+        renderConfirm(d.name);
+      }).catch(function(e){
+        btn.disabled = false; btn.textContent = 'Start session';
+        alert('Could not save right now (' + (e && e.code ? e.code : 'error') + '). Please try again.');
+      });
+    });
+  }
+
+  function renderConfirm(name){
+    var html = '<div class="phone"><div class="card confirm">' +
+      '<div class="tick">&#10003;</div>' +
+      '<div class="h-title">Thanks, '+esc((name||'').split(' ')[0]||'athlete')+'</div>' +
+      '<div class="sub">Your check-in is logged and synced to your coach\'s dashboard.</div>' +
+      '<button class="primary-btn" id="cf-another">Log another check-in</button>' +
+      '<button class="ghost-btn" id="cf-switch">Not you? Switch profile</button>' +
+    '</div></div>';
+    renderShell(html);
+    document.getElementById('cf-another').addEventListener('click', renderAthleteRoute);
+    document.getElementById('cf-switch').addEventListener('click', function(){
+      safeDel('vw_athlete_id'); safeDel('vw_athlete_name');
+      state.athleteId = null;
+      renderAthleteRoute();
+    });
+  }
+
+  function renderAthleteRoute(){
+    if(!db){ renderJoin(); return; }
+    if(!state.athleteId){ renderJoin(); return; }
+    renderShell('<div class="loading">Loading your profile…</div>');
+    db.doc('athletes/'+state.athleteId).get().then(function(doc){
+      if(!doc.exists){
+        safeDel('vw_athlete_id'); safeDel('vw_athlete_name');
+        state.athleteId = null;
+        renderJoin();
+        return;
+      }
+      renderCheckin(doc);
+    }).catch(function(){ renderJoin(); });
+  }
+
+  // ---------------- COACH: dashboard ----------------
+
+  function riskBadge(level){
+    return '<span class="badge '+esc(level||'New')+'">'+esc(level==='New'?'No data yet':level)+'</span>';
+  }
+
+  function renderDashboardShell(){
+    var html = (db?'':noDbBanner()) +
+      '<div class="stats">' +
+        '<div class="stat"><div class="k">Athletes tracked</div><div class="v" id="st-count">–</div></div>' +
+        '<div class="stat"><div class="k">Checked in today</div><div class="v" id="st-today">–</div></div>' +
+        '<div class="stat"><div class="k">Flagged for review</div><div class="v warn" id="st-flag">–</div></div>' +
+      '</div>' +
+      '<div class="sectiontitle">Squad roster — live</div>' +
+      '<div class="roster" id="roster"><div class="loading">Connecting…</div></div>';
+    renderShell(html);
+  }
+
+  function renderRoster(docs){
+    var rosterEl = document.getElementById('roster');
+    if(!rosterEl) return;
+    if(docs.length===0){
+      rosterEl.innerHTML = '<div class="empty">No athletes have joined yet.<br>Share the app link with your squad — as soon as someone submits their name on the Athlete tab, they\'ll appear here.</div>';
+    } else {
+      var todayCount = 0, flagCount = 0;
+      var rows = docs.map(function(doc){
+        var d = doc.data();
+        var lvl = d.riskLevel || 'New';
+        if(lvl==='Elevated' || lvl==='High') flagCount++;
+        if(d.lastCheckinAt && timeAgo(d.lastCheckinAt)==='Today') todayCount++;
+        var metaBits = [d.position, d.age?('Age '+d.age):null].filter(Boolean).join(' · ');
+        return '<button class="row" data-id="'+esc(doc.id)+'">' +
+          '<div class="name">'+esc(d.name)+(metaBits?('<span class="sm">'+esc(metaBits)+'</span>'):'')+'</div>' +
+          '<div class="when">'+esc(timeAgo(d.lastCheckinAt))+'</div>' +
+          riskBadge(lvl) +
+          '<div class="chevron">View &rarr;</div>' +
+        '</button>';
+      }).join('');
+      rosterEl.innerHTML = rows;
+      var count = document.getElementById('st-count'); if(count) count.textContent = docs.length;
+      var todayEl = document.getElementById('st-today'); if(todayEl) todayEl.textContent = todayCount;
+      var flagEl = document.getElementById('st-flag'); if(flagEl) flagEl.textContent = flagCount;
+
+      var btns = rosterEl.querySelectorAll('.row');
+      for(var i=0;i<btns.length;i++){
+        btns[i].addEventListener('click', function(e){
+          cleanupListeners();
+          renderDetailRoute(e.currentTarget.getAttribute('data-id'));
+        });
+      }
+    }
+  }
+
+  function renderDashboardRoute(){
+    renderDashboardShell();
+    if(!db) return;
+    dashUnsub = db.collection('athletes').orderBy('name').onSnapshot(function(snap){
+      renderRoster(snap.docs);
+    }, function(err){
+      var rosterEl = document.getElementById('roster');
+      if(rosterEl) rosterEl.innerHTML = '<div class="empty">Could not load the roster ('+esc(err.code)+'). Check your Firestore rules.</div>';
+    });
+  }
+
+  // ---------------- COACH: athlete detail ----------------
+
+  function riskColorHex(level){
+    if(level==='High') return '#C24E3A';
+    if(level==='Elevated') return '#E0A544';
+    return '#0F9E7C';
+  }
+
+  function renderDetailShell(){
+    var html = (db?'':noDbBanner()) +
+      '<a href="#" class="backlink" id="back-dash">&larr; Back to roster</a>' +
+      '<div id="detail-body"><div class="loading">Loading athlete…</div></div>';
+    renderShell(html);
+    document.getElementById('back-dash').addEventListener('click', function(e){
+      e.preventDefault();
+      cleanupListeners();
+      renderDashboardRoute();
+    });
+  }
+
+  function renderDetailBody(athleteDoc, checkinDocsAsc){
+    var el = document.getElementById('detail-body');
+    if(!el) return;
+    var d = athleteDoc.data();
+    var lvl = d.riskLevel || 'New';
+    var last3 = checkinDocsAsc.slice(-4);
+
+    var bars = '';
+    if(last3.length===0){
+      bars = '<div class="trendnote">No check-ins logged yet.</div>';
+    } else {
+      var maxH = 130;
+      bars = '<div class="bars">' + last3.map(function(doc,i){
+        var c = doc.data();
+        var h = Math.max(10, Math.round((c.discomfort/5)*maxH));
+        return '<div class="b"><div class="stem" style="height:'+h+'px;background:'+riskColorHex(c.riskLevel)+'"></div><div class="lb">'+ (i+1) +'</div></div>';
+      }).join('') + '</div>';
+    }
+
+    var chips = '<div class="chips">' +
+      (d.position ? '<div class="chip">Position <b>'+esc(d.position)+'</b></div>' : '') +
+      (d.age ? '<div class="chip">Age <b>'+esc(d.age)+'</b></div>' : '') +
+      (d.dominantLeg ? '<div class="chip">Dominant leg <b>'+esc(d.dominantLeg)+'</b></div>' : '') +
+      (d.team ? '<div class="chip">Team <b>'+esc(d.team)+'</b></div>' : '') +
+      '<div class="chip">Sessions logged <b>'+esc(d.sessionsLogged||0)+'</b></div>' +
+    '</div>';
+
+    var logs = checkinDocsAsc.slice().reverse().slice(0,6).map(function(doc){
+      var c = doc.data();
+      return '<div class="logrow"><span class="d1">'+esc(timeAgo(c.ts))+'</span><span class="d2">Discomfort '+esc(c.discomfort)+'/5 &middot; Energy '+esc(c.energy)+'/5 &middot; Sleep '+esc(c.sleep)+'/5</span></div>';
+    }).join('') || '<div class="logrow"><span class="d2">No check-ins yet</span></div>';
+
+    el.innerHTML =
+      '<div class="detail-head">' +
+        '<div class="avatar">'+esc(initials(d.name))+'</div>' +
+        '<div><h2>'+esc(d.name)+'</h2><div class="since">Joined '+esc(timeAgo(d.createdAt))+'</div></div>' +
+        '<div style="flex-grow:1"></div>' + riskBadge(lvl) +
+      '</div>' +
+      chips +
+      '<div class="detail-grid">' +
+        '<div class="trendcard"><div class="lbl">Discomfort trend (self-report)</div>' + bars +
+          '<div class="trendnote">Demo risk flag from self-reported check-ins. The full ValgusWatch system combines this with the dual-IMU knee valgus/asymmetry score from the wearable prototype.</div>' +
+        '</div>' +
+        '<div>' +
+          '<div class="metric'+(lvl==='High'?' warn':'')+'"><div class="k">Latest discomfort</div><div class="v">'+ (d.lastDiscomfort!=null?(d.lastDiscomfort+'/5'):'—') +'</div><div class="d">'+esc(timeAgo(d.lastCheckinAt))+'</div></div>' +
+          '<div class="metric"><div class="k">Recent check-ins</div><div class="loglist">'+logs+'</div></div>' +
+        '</div>' +
+      '</div>';
+  }
+
+  function renderDetailRoute(athleteId){
+    renderDetailShell();
+    if(!db) return;
+    var athleteRef = db.doc('athletes/'+athleteId);
+    var checkinsRef = db.collection('athletes/'+athleteId+'/checkins');
+    var latestAthlete = null, latestCheckins = [];
+    var redraw = function(){
+      if(latestAthlete && latestAthlete.exists) renderDetailBody(latestAthlete, latestCheckins);
+    };
+    var unsub1 = athleteRef.onSnapshot(function(doc){
+      latestAthlete = doc;
+      if(!doc.exists){
+        var el = document.getElementById('detail-body');
+        if(el) el.innerHTML = '<div class="empty">This athlete record no longer exists.</div>';
+        return;
+      }
+      redraw();
+    }, function(){});
+    var unsub2 = checkinsRef.orderBy('ts','desc').limit(8).onSnapshot(function(snap){
+      latestCheckins = snap.docs.slice().reverse();
+      redraw();
+    }, function(){});
+    detailUnsub = function(){ unsub1(); unsub2(); };
+  }
+
+  // ---------------- routing ----------------
+
+  function route(){
+    cleanupListeners();
+    if(state.role==='coach'){ renderDashboardRoute(); }
+    else { renderAthleteRoute(); }
+  }
+
+  // ---------------- boot ----------------
+
+  function boot(){
+    if(configIsPlaceholder){
+      db = null;
+      route();
+      return;
+    }
+    try{
+      firebase.initializeApp(firebaseConfig);
+      db = firebase.firestore();
+    } catch(e){
+      db = null;
+    }
+    route();
+  }
+
+  boot();
+})();
+</script>
+</body>
+</html>
